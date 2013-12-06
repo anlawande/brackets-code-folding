@@ -52,13 +52,16 @@ define(function (require, exports, module) {
         commentFold = require("foldhelpers/comment-fold"),
         xmlFold =   require("foldhelpers/xml-fold"),
         indentFold = require("foldhelpers/indent-fold"),
-        latexFold   = require("foldhelpers/latex-fold");
+        latexFold   = require("foldhelpers/latex-fold"),
+        customFold   = require("foldhelpers/custom-fold");
 
     CodeMirror.registerHelper("fold", "brace", braceFold);
     CodeMirror.registerHelper("fold", "comment", commentFold);
     CodeMirror.registerHelper("fold", "xml", xmlFold);
     CodeMirror.registerHelper("fold", "indent", indentFold);
     CodeMirror.registerHelper("fold", "stex", latexFold);
+    CodeMirror.registerHelper("fold", "custom", customFold);
+    
      /**
      * Utility function to fold a line if it is not already folded
      */
@@ -217,7 +220,10 @@ define(function (require, exports, module) {
 			var path = editor.document.file.fullPath;
             _lineFolds[path] = _lineFolds[path] || {};
             cm.setOption("gutters", ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]);
-            cm.setOption("foldGutter", {onGutterClick: onGutterClick});
+            cm.setOption("foldGutter", {
+                rangeFinder: new CodeMirror.fold.combine(CodeMirror.fold.brace, CodeMirror.fold.comment, CodeMirror.fold.xml, CodeMirror.fold.custom),
+                onGutterClick: onGutterClick
+            });
             cm.on("fold", function (cm, from, to) {
                 _lineFolds[path][from.line] = {from: from, to: to};
             });
